@@ -6,15 +6,15 @@ import { Request, Response } from 'express';
 
 class UserRepository {
     create(request: Request, response: Response){
-        const { name, email, password } = request.body;
+        const { name, email, password, avatar } = request.body;
         pool.getConnection((err: any, connection: any) => {
             hash(password, 10, (err, hash) => {
                 if(err){
                     return response.status(500).json(err)
                 }
                 connection.query(
-                    'INSERT INTO users (user_id, name, email, password) VALUES (?,?,?,?)',
-                    [uuidv4(), name, email, hash],
+                    'INSERT INTO users (user_id, name, email, password, avatar) VALUES (?,?,?,?,?)',
+                    [uuidv4(), name, email, hash, avatar],
                     (error: any, result: any, fields: any) => {
                         connection.release();
                         if (error) {
@@ -37,11 +37,11 @@ class UserRepository {
                 (error: any, results: any, fields: any) => {
                     connection.release();
                     if (error) {
-                        return response.status(400).json({error: "Erro na sua autenticação!"})
+                        return response.status(400).json({message: "Erro na sua autenticação!"})
                     }
                     compare(password, results[0].password, (err, result) => {
                         if (err) {
-                            return response.status(400).json({error: "Erro na sua autenticação!"})
+                            return response.status(400).json({message: "Erro na sua autenticação!"})
                         }
                         if (result) {
                             const token = sign({
@@ -49,9 +49,9 @@ class UserRepository {
                                 email: results[0].email
                             }, process.env.SECRET as string, {expiresIn: "1d"})
 
-                            return response.status(200).json({token: token, message: "Autenticado com sucesso"})
+                            return response.status(200).json({token: token, message: "Autenticado com sucesso!"})
                         } else {
-                            return response.status(200).json({error: "Usuário ou Senha incorretos"})
+                            return response.status(200).json({message: "Usuário ou Senha incorretos"})
                         }
                     });
                 }
@@ -79,6 +79,7 @@ class UserRepository {
                                 nome: resultado[0].name,
                                 email: resultado[0].email,
                                 id: resultado[0].user_id,
+                                avatar: resultado[0].avatar
                             }
                         })
                     }
