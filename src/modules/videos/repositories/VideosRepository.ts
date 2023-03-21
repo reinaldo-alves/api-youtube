@@ -21,6 +21,40 @@ class VideoRepository {
     }
 
 
+    getAllVideos(request: Request, response: Response){
+        pool.getConnection((err: any, connection: any) => {
+            connection.query(
+                'SELECT * FROM videos',
+                (error: any, results: any, fields: any) => {
+                    connection.release();
+                    if (error) {
+                        return response.status(400).json({error: "Erro ao buscar os vídeos"})
+                    }
+                    return response.status(200).json({message: "Vídeos retornados com sucesso", videos: results})
+                }
+            )
+        })
+    }
+
+
+    getVideosByCat (request: Request, response: Response){
+        const { category } = request.params;
+        pool.getConnection((err: any, connection: any) => {
+            connection.query(
+                'SELECT * FROM videos WHERE category = ?',
+                [category],
+                (error: any, results: any, fields: any) => {
+                    connection.release();
+                    if (error) {
+                        return response.status(400).json({error: "Erro ao buscar os vídeos"})
+                    }
+                    return response.status(200).json({message: "Vídeos retornados com sucesso", videos: results})
+                }
+            )
+        })
+    }
+
+
     getVideos(request: Request, response: Response){
         const { user_id } = request.query;
         pool.getConnection((err: any, connection: any) => {
