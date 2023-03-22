@@ -2,6 +2,7 @@ import express from 'express'
 import { userRoutes } from './routes/user.routes';
 import { videosRoutes } from './routes/videos.routes';
 import { config } from 'dotenv';
+import { shortsRoutes } from './routes/shorts.routes';
 
 config();
 const app = express();
@@ -26,5 +27,6 @@ app.get("/", function (req, res) {
 
 app.use('/user', userRoutes);
 app.use('/videos', videosRoutes);
+app.use('/shorts', shortsRoutes);
 
 app.listen(port)
