@@ -39,6 +39,9 @@ class UserRepository {
                     if (error) {
                         return response.status(400).json({message: "Erro na sua autenticação!"})
                     }
+                    if (!results[0]){
+                        return response.status(202).json({message: "Usuário não cadastrado"})
+                    }
                     compare(password, results[0].password, (err, result) => {
                         if (err) {
                             return response.status(400).json({message: "Erro na sua autenticação!"})
@@ -51,7 +54,7 @@ class UserRepository {
 
                             return response.status(200).json({token: token, message: "Autenticado com sucesso!"})
                         } else {
-                            return response.status(200).json({message: "Usuário ou Senha incorretos"})
+                            return response.status(200).json({message: "Senha incorreta"})
                         }
                     });
                 }
