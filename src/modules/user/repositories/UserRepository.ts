@@ -6,15 +6,15 @@ import { Request, Response } from 'express';
 
 class UserRepository {
     create(request: Request, response: Response){
-        const { name, email, password, avatar } = request.body;
+        const { name, email, password, avatar, color } = request.body;
         pool.getConnection((err: any, connection: any) => {
             hash(password, 10, (err, hash) => {
                 if(err){
                     return response.status(500).json(err)
                 }
                 connection.query(
-                    'INSERT INTO users (user_id, name, email, password, avatar) VALUES (?,?,?,?,?)',
-                    [uuidv4(), name, email, hash, avatar],
+                    'INSERT INTO users (user_id, name, email, password, avatar, color) VALUES (?,?,?,?,?,?)',
+                    [uuidv4(), name, email, hash, avatar, color],
                     (error: any, result: any, fields: any) => {
                         connection.release();
                         if (error) {
@@ -27,7 +27,7 @@ class UserRepository {
         })
     }
 
-
+    //FAZER VALIDAÇÃO PARA SABER SE EMAIL JÁ EXISTE
     login(request: Request, response: Response){
         const { email, password } = request.body;
         pool.getConnection((err: any, connection: any) => {
@@ -82,7 +82,8 @@ class UserRepository {
                                 nome: resultado[0].name,
                                 email: resultado[0].email,
                                 id: resultado[0].user_id,
-                                avatar: resultado[0].avatar
+                                avatar: resultado[0].avatar,
+                                color: resultado[0].color
                             }
                         })
                     }
