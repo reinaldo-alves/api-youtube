@@ -13,21 +13,34 @@ class UserRepository {
                     return response.status(500).json(err)
                 }
                 connection.query(
-                    'INSERT INTO users (user_id, name, email, password, avatar, color) VALUES (?,?,?,?,?,?)',
-                    [uuidv4(), name, email, hash, avatar, color],
-                    (error: any, result: any, fields: any) => {
-                        connection.release();
+                    'SELECT email FROM users WHERE email = ?',
+                    [email],
+                    (error: any, result: any, fields:any) => {
                         if (error) {
-                            return response.status(400).json(error)
+                            connection.release();
+                            return response.status(500).json(error);
                         }
-                        response.status(200).json({message: "Usuário criado com sucesso"});
+                        if (result.length > 0) {
+                            connection.release();
+                            return response.status(409).json({message: "Já existe uma conta com este email. Faça login ou escolha outro email"});
+                        }
+                        connection.query(
+                            'INSERT INTO users (user_id, name, email, password, avatar, color) VALUES (?,?,?,?,?,?)',
+                            [uuidv4(), name, email, hash, avatar, color],
+                            (error: any, result: any, fields: any) => {
+                                connection.release();
+                                if (error) {
+                                    return response.status(400).json(error)
+                                }
+                                response.status(200).json({message: "Usuário criado com sucesso"});
+                            }
+                        )
                     }
                 )
             })
         })
     }
 
-    //FAZER VALIDAÇÃO PARA SABER SE EMAIL JÁ EXISTE
     login(request: Request, response: Response){
         const { email, password } = request.body;
         pool.getConnection((err: any, connection: any) => {
